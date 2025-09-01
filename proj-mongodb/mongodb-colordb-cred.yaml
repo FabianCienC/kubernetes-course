@@ -1,0 +1,12 @@
+## In real life, you never commit secrets, you always create via secret manager or kubectl
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongodb-colordb-creds
+  labels:
+    app: mongodb
+type: Opaque
+data:
+  username: Y29sb3JkYl91c2Vy          # colordb_user
+  password: Y29sb3JkYl9wYXNzd29yZA==  # colordb_password
