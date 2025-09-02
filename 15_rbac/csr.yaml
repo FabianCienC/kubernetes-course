@@ -1,0 +1,61 @@
+# Firs need a key
+### openssl genrsa -out bob.key 2048                                        
+
+# Then need a certificate
+### openssl req -new -key alice.key -out alice.csr -subj "/CN=alice/O=admin"
+
+# Then create the certificateSigningRequest via this file
+# See that request is the Base64 of certificate
+### cat bob.csr | base64 | tr -d "\n"  
+
+apiVersion: certificates.k8s.io/v1
+kind: CertificateSigningRequest
+metadata:
+  name: alice
+spec:
+  request: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQ1pUQ0NBVTBDQVFBd0lERU9NQXdHQTFVRUF3d0ZZV3hwWTJVeERqQU1CZ05WQkFvTUJXRmtiV2x1TUlJQgpJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBeTh4NlFENnlqNVVMMFJlWTBPRVM0cGJTCitJQ1RTRDFmaFFKQXBEaEFSdzJyTUQrcUxjMjFFd0tCR0tNbHFxSTNWbGFXOXh6OHBXR2lZb2R5OGZCWU4yeGkKYU1CWTJSUXZCNjlZcTE2eGVobmJwb1A2QmphU2dOUkRmVW5OV3p5UE9oOHIwZWpXWlY0alFUeDNJYnZLYlZ6WQpaY01nZERqd0Uwc3pPbEtEWTltVU8xUElEVUorclpxM1F1UVQwNnJQVG9oSk9VcU9ZV0NtSUVhYTBhN0E2TWxNCk8vWFdjeVhiUms2UnNYcDRvY0FUeW5yeUhBWlFIajlTTGM3aXZpWW02QlMxbVRGOEdyQ2hCUVJEQTFwWXhxSDAKQ3VHakMzUmY1TGdjUHZJdHRMdjgxc01FVGk3VHZSK0lQUDgrRm5IRXRoWEJ6MEMzdUZlOFlqc1B4ZEpuVXdJRApBUUFCb0FBd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFIeXczak42L3Y4bStQU25oWEJKcjJkOUZmeUNOS0xHClBoR0lWTkxrMXRuekNaZTdkYk5OaVdML2tZd3ovSHowU0V2UG5STUVJaGMyVWc5MkhFaGFnZ1B4ZUlJd0JiVXkKOWJLZElhT0Z6emNySlhxWDgwQ0dWaG5VMHRMNFgzRTMvRkRVcHJqbTBzVFNhUGJaQkwzSTN4Q1ZMVk8vamxvaQpuSGYreGd0c2FuaHVHYUpuNEZ6WncyV0EvTnFzK1FlMU1oamR1WitiQjFhQk1EaVI2RHhSWUdBZWZpaWQ4YUVzCkFreWt3bCtSTHFMMi80Tkdza05LYXZoUW1DSVJoQm5FRmJkSzFFUzVIK0U2OVBHSWRMV2dhNXV1VnJ6WlptZk4KdnZRcjVaZ0FKV25nK21aNWNDeXppQ2k0VlpwNXR4NmRYK0x4NFhLTGIzd0g2ZUN6RTNnWEp4VT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUgUkVRVUVTVC0tLS0tCg==
+  signerName: kubernetes.io/kube-apiserver-client
+  expirationSeconds: 86400
+  usages:
+    - client auth
+
+---
+apiVersion: certificates.k8s.io/v1
+kind: CertificateSigningRequest
+metadata:
+  name: bob
+spec:
+  request: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQ1lUQ0NBVWtDQVFBd0hERU1NQW9HQTFVRUF3d0RZbTlpTVF3d0NnWURWUVFLREFOa1pYWXdnZ0VpTUEwRwpDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLQW9JQkFRQzFIMWFOeW5lNXBieml0RFpZV2xOem8zc1Z4ZVljCjBjS3NPZTlJNUkwaDd0akNsZGphSW5mR1J0MFhkVGo2MDRzWVlSR1owV0tlRHRSd0h3eGpHREgrbUc4TkNtbysKMVhxbzhBaVZjMVNPRTJwN0dFVWQzRGM2d2FKNkNxZzV6Szh2a3BXSlRJSzlHMTByY0RNb1poRGVhdkdJZkkvQgpYdkM2dVo4MjBqR1N2Y212Tk1wbnpNVkY4NFRFWStLVXltb2VjWFJZK1VsSEhwRjJaNjFzcnhCdjU2aXduNklHCmNtNFdCNUVQdlFWMFVFWVppcm5JWWw4RzgyVmZDQjRwVEsyaFZ4dlo2bVFJWCtJZE1ReDJkQnFEa3NVR2tvR00KdXZaYnUxWnZFVHBMVUNJUHNHTzZXSm9ETTJIVHFWWlorUVdYa0R0MEh2cWNuYWd2TE1TV3d5Q3RBZ01CQUFHZwpBREFOQmdrcWhraUc5dzBCQVFzRkFBT0NBUUVBU1lXWjgvVE00NURQYlBHSHRrNlJvQ0dWMXNhNk4vQVk4c2t0Ci9iTVk3Yjg3b0tJQzlDdGoyb0VkODU5a2tua1grZVpLVVpCVVcweHNjUERYb0ZpeTdPQ2pvRldBb3ZNK1I5NWgKK3FQd0hNYUhXNC8zMTJsTW5WbDB0eUJxU2o0VkIrd3g4SXg2SzZVUHMxUVNudUFxRUFodzBzOGhrYXQ5dldjKworZHdMd0pxaEJuRmFNa0hDZmNCeng4cmxWamlkZVRsRk0zbGtRVnFrVDBsTWNVQWNCT1l5cDIvdDZlSFRHZE9RCjY5Wk8rVkE0amF5N2dBcGNpL2k2d1FCbDVGTUFuOEZJN09XK2xvaFNOSlVva1h0dnNpWjJVd1MrVGZhYVFSQVkKZm5BS3dqY2tmcW5zUkdvc204S2NRekVVZ0txa28zV2ZmeXFNZWdlMHRMbnFmK0Y0RHc9PQotLS0tLUVORCBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0K
+  signerName: kubernetes.io/kube-apiserver-client
+  expirationSeconds: 86400
+  usages:
+    - client auth
+
+
+# Then need approve the request
+### kubectl certificate approve alice bob                                                                                                                kube minikube
+
+# Finally need to create the certificate
+### kubectl get csr alice -o jsonpath="{.status.certificate}" | base64 -d > alice.crt
+
+# Yo see the data of the certificate use
+### openssl x509 -noout -text -in "alice.crt" 
+
+
+
+
+# The path of the kubecofig file is 
+### ~/.kube/config
+
+# You can create the context even if you dont have the user
+### kubectl config set-context alice --cluster minikube --user alice 
+
+# Then you need to create the user 
+### kubectl config set-credentials alice --client-key $(realpath alice.key) --client-certificate $(realpath alice.crt) --embed-certs=true  
+# the embed-certs allow to reference to the base64 encoded certificate instead of the path of the certificate
+
+# to Switch between context use 
+### kubectl config use-context alice
+
+# and see the context
+### kubectl config current-context

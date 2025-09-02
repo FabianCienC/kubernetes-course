@@ -1,0 +1,66 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+
+resources:
+  - ../../base
+
+
+namespace: dev
+
+namePrefix: dev-
+nameSuffix: -alpha
+
+commonLabels:
+  project: ecommerce-app
+  tier: backend
+  env: dev
+
+commonAnnotations:
+  team: finance
+  maintainer: "finance@company.org"
+  repository: "git-repo"
+
+replicas:
+  - name: nginx
+    count: 4
+
+configMapGenerator:
+  - name: feature-flag-config
+    literals:
+      - use_db=true
+      - expose_metrics=true
+  - name: db-init-conifg
+    files:
+      - db-init.js
+
+secretGenerator:
+  - name: local-config
+    envs:
+      - .env.local
+    type: Opaque
+
+### Both are good options
+## This is more scalable
+# patches:
+#   - path: update-resources.patch.yaml
+
+patches:
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: nginx
+      spec:
+        template:
+          spec:
+            containers:
+              - name: nginx
+                resources:
+                  request:
+                    memory: "128Mi"
+                    cpu: "100m"
+
+
+generatorOptions:
+  disableNameSuffixHash: true
